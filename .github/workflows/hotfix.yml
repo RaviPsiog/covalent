@@ -1,0 +1,95 @@
+# Copyright 2021 Agnostiq Inc.
+#
+# This file is part of Covalent.
+#
+# Licensed under the GNU Affero General Public License 3.0 (the "License").
+# A copy of the License may be obtained with this software package or at
+#
+#      https://www.gnu.org/licenses/agpl-3.0.en.html
+#
+# Use of this file is prohibited except in compliance with the License. Any
+# modifications or derivative works of this file must retain this copyright
+# notice, and modified files must contain a notice indicating that they have
+# been altered from the originals.
+#
+# Covalent is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE. See the License for more details.
+#
+# Relief from the License may be granted by purchasing a commercial license.
+
+name: hotfix
+
+on:
+  push:
+    branches:
+      - "release-0.*.*"
+
+jobs:
+  hotfix:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ env.VERSION }}
+    steps:
+      - name: Stable tag
+        id: stable-tag
+        uses: ./.github/actions/describe
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.event.ref }}
+          stable: true
+      - name: Latest tag
+        id: latest-tag
+        uses: ./.github/actions/describe
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.event.ref }}
+          stable: false
+      - name: Check out head
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Hotfix version
+        id: hotfix
+        run: |
+          re='^[0-9]+$'
+          IFS='-' read -ra stable_tag <<< $(echo ${{ steps.stable-tag.outputs.tag }} | cut -c2-)
+          IFS='-' read -ra release_tag <<< $(echo ${{ github.event.ref }} | cut -c2-)
+          IFS='-' read -ra latest_tag <<< $(echo ${{ steps.latest-tag-release.outputs.tag }} | cut -c2-)
+          if [ ${stable_tag[0]} != ${release_tag[1]} ] ; then
+            echo "This branch does not contain a matching stable release. Hotfixes can only be applied to stable releases."
+            exit 0
+          if [ ${#latest_tag[1]} -eq 0 ] ; then
+            version="${latest_tag[0]}-1-rc.0"
+          elif [[ ${latest_tag[1]} =~ $re ]] && [ ${#latest_tag[2]} -eq 0 ] ; then
+            version="${latest_tag[0]}-$(( ${latest_tag[1]} + 1 ))-rc.0"
+          elif [[ ${latest_tag[1]} =~ $re ]] ; then
+            IFS='.' read -ra rc <<< "${latest_tag[2]}"
+            version="${latest_tag[0]}-${latest_tag[1]}-rc.$(( ${rc[1]} + 1 ))"
+          else
+            echo "Hotfix branches must be created from a stable release."
+            exit 2
+          fi
+          changelog_header="## [${version}] - $(date -I)"
+          nl=$'\n'
+          sed -i '/UNRELEASED/a\'$'\n''\'$'\n'"$changelog_header" CHANGELOG.md
+          echo $version > VERSION
+          echo "VERSION=$version" >> $GITHUB_ENV
+      - name: Commit
+        uses: EndBug/add-and-commit@v9
+        if: ${{ env.VERSION }}
+        with:
+          author_name: CovalentOpsBot
+          author_email: covalentopsbot@users.noreply.github.com
+          message: "${{ github.event.issue.title }} (#${{ github.event.issue.number }})"
+          tag: "v${{ env.VERSION }}"
+
+  release:
+    name: Create Release
+    needs: hotfix
+    if: needs.hotfix.outputs.version
+    uses: AgnostiqHQ/covalent/.github/workflows/release.yml@develop
+    with:
+      prerelease: true
+      prerelease_version: needs.hotfix.outputs.version
+    secrets: inherit # pragma: allowlist secret

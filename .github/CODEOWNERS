@@ -1,0 +1,51 @@
+# Copyright 2021 Agnostiq Inc.
+#
+# This file is part of Covalent.
+#
+# Licensed under the GNU Affero General Public License 3.0 (the "License").
+# A copy of the License may be obtained with this software package or at
+#
+#      https://www.gnu.org/licenses/agpl-3.0.en.html
+#
+# Use of this file is prohibited except in compliance with the License. Any
+# modifications or derivative works of this file must retain this copyright
+# notice, and modified files must contain a notice indicating that they have
+# been altered from the originals.
+#
+# Covalent is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE. See the License for more details.
+#
+# Relief from the License may be granted by purchasing a commercial license.
+
+# CODEOWNERS
+
+# Core code, docs, and tests are owned by the Agnostiq engineering team.
+/covalent/		@AgnostiqHQ/aq-engineers
+/covalent_dispatcher/	@AgnostiqHQ/aq-engineers
+/doc/			@santoshkumarradha
+/tests/			@AgnostiqHQ/aq-engineers
+.flake8			@AgnostiqHQ/aq-engineers
+.gitignore		@AgnostiqHQ/aq-engineers
+.pre-commit-config.yaml	@AgnostiqHQ/aq-engineers
+.prettierrc 		@AgnostiqHQ/aq-engineers
+.pylintrc 		@AgnostiqHQ/aq-engineers
+.readthedocs.yaml 	@AgnostiqHQ/aq-engineers
+.wci.yaml 		@AgnostiqHQ/aq-engineers
+CODE_OF_CONDUCT.md 	@AgnostiqHQ/aq-engineers
+CONTRIBUTING.md 	@AgnostiqHQ/aq-engineers
+README.md 		@AgnostiqHQ/aq-engineers
+pyproject.toml 		@AgnostiqHQ/aq-engineers
+
+# Covalent UI is owned by collaborators from Psiog.
+/covalent_ui/**/*.js 		@mshkanth @Prasy12
+
+# Modifying these requires additional approval.
+Dockerfile		@AgnostiqHQ/aq-managers
+.github/**		@AgnostiqHQ/aq-managers
+LICENSE			@AgnostiqHQ/aq-managers
+MANIFEST.in		@AgnostiqHQ/aq-managers
+meta.yaml		@AgnostiqHQ/aq-managers
+**/requirements.txt	@AgnostiqHQ/aq-managers
+setup.py		@AgnostiqHQ/aq-managers
+Makefile 		@AgnostiqHQ/aq-managers
